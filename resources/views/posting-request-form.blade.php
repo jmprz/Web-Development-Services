@@ -11,6 +11,28 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
+<style>
+    @media print {
+        @page {
+            margin: 0;
+        }
+
+        body {
+            margin: 1.6cm;
+        }
+
+        .hidden {
+            display: block !important;
+        }
+
+        nav,
+        button,
+        form,
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
 
 <body class="bg-slate-50 antialiased">
     <div class="min-h-screen flex flex-col items-center justify-center p-4 md:p-8">
@@ -138,21 +160,29 @@
                 <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             </div>
             <h3 class="text-2xl font-bold text-slate-800 mb-2">Submission Successful!</h3>
-            <p class="text-slate-500 mb-6">Your request has been logged. Please keep your Control Number for tracking.</p>
-            
+            <p class="text-slate-500 mb-6">Your request has been logged.</p>
+          
+            <!--  Printing Button 
             <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-8">
                 <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Control Number</span>
                 <div class="text-3xl font-mono font-black text-red-700 mt-1">
                     {{ session('recent_post')->ctrl_no }}
                 </div>
             </div>
+<div class="flex flex-col sm:flex-row gap-3 mb-3">
+    @if(session('recent_post'))
+        <a href="{{ route('posting-request.pdf', session('recent_post')->id) }}" 
+           target="_blank"
+           class="flex-1 bg-slate-800 text-white font-bold py-4 rounded-xl hover:bg-slate-900 transition flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            Print Request Document
+        </a>
+    @endif
+</div>--> 
 
-            <div class="flex flex-col sm:flex-row gap-3">
-                <button onclick="printRequest()" class="flex-1 bg-slate-800 text-white font-bold py-4 rounded-xl hover:bg-slate-900 transition flex items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    Print Slip
-                </button>
-                <button onclick="document.getElementById('successModal').remove()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition">
+                <button onclick="document.getElementById('successModal').remove()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition w-full">
                     Done
                 </button>
             </div>
@@ -160,37 +190,7 @@
     </div>
 </div>
 
-<div id="printSection" class="hidden">
-    <div style="padding: 40px; font-family: sans-serif; border: 2px solid #333;">
-        <center>
-            <h2 style="margin-bottom: 0;">EARIST</h2>
-            <p style="margin-top: 5px;">Web Development Services - Posting Request Slip</p>
-            <hr>
-        </center>
-        <div style="margin-top: 30px;">
-            <p><strong>Control No:</strong> <span style="font-size: 1.5em; color: #b91c1c;">{{ session('recent_post')->ctrl_no }}</span></p>
-            <p><strong>Date Generated:</strong> {{ now()->format('F j, Y, g:i a') }}</p>
-            <p><strong>Department:</strong> {{ session('recent_post')->department }}</p>
-            <p><strong>Requesting Personnel:</strong> {{ session('recent_post')->personnel }}</p>
-            <p><strong>Title:</strong> {{ session('recent_post')->doc_title }}</p>
-            <p><strong>Posting Date:</strong> {{ session('recent_post')->date_to_be_posted }}</p>
-        </div>
-        <div style="margin-top: 50px; border-top: 1px solid #ccc; padding-top: 20px; font-size: 0.8em; color: #666;">
-            * This serves as your proof of request. Please coordinate with the WDS office for follow-ups.
-        </div>
-    </div>
-</div>
-
-<script>
-    function printRequest() {
-        const printContents = document.getElementById('printSection').innerHTML;
-        const originalContents = document.body.innerHTML;
-        document.body.innerHTML = printContents;
-        window.print();
-        document.body.innerHTML = originalContents;
-        window.location.reload(); // Reload to restore scripts and styles
-    }
-</script>
+   
 @endif
 </body>
 

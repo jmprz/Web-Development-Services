@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\PostingRequest;
 use Illuminate\Http\Request;
 
+use Spatie\LaravelPdf\Facades\Pdf;
+
+
+
 class PostingRequestController extends Controller
 {
     public function index()
@@ -17,6 +21,14 @@ class PostingRequestController extends Controller
 {
     // This simply returns the public view
     return view('posting-request-form');
+}
+
+public function downloadPdf(PostingRequest $postingRequest)
+{
+    // Note: We pass $postingRequest as 'item' to match the PDF blade template
+    return Pdf::view('pdfs.request-slip', ['item' => $postingRequest])
+        ->format('a4')
+        ->name('EARIST-WDS-' . $postingRequest->ctrl_no . '.pdf');
 }
 
 public function updateStatus(Request $request, PostingRequest $postingRequest)
