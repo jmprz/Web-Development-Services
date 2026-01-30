@@ -25,36 +25,42 @@
     </div>
 
     <div class="mt-4 space-y-6 mx-20 font-sans">
-        <div class="pb-1">
-            <p class="text-md font-bold">Control Number:</span>
-            <p class="text-md">{{ $item->ctrl_no }}</p>
-        </div>
+    <div class="pb-1">
+        <p class="text-md font-bold text-black">Control Number:</p>
+        <p class="text-md text-black">{{ $item->ctrl_no }}</p>
+    </div>
 
-          <div class="pb-1">
-            <p class="text-md font-bold">Office / College:</span>
-            <p class="text-md">{{ $item->department }}</p>
-        </div>
+    <table class="w-full border-2 border-black border-collapse text-left">
+        <tbody>
+            <tr>
+                <td class="w-1/3 border border-black p-3 align-top">
+                    <span class="block text-md font-bold mb-1">Office / College:</span>
+                    <span class="text-md text-black">{{ $item->department }}</span>
+                </td>
+                <td class="w-1/3 border border-black p-3 align-top">
+                    <span class="block text-md font-bold mb-1">Title:</span>
+                    <span class="text-md text-black">{{ $item->doc_title }}</span>
+                </td>
+                <td class="w-1/3 border border-black p-3 align-top">
+                    <span class="block text-md font-bold mb-1">Schedule of Posting:</span>
+                    <span class="text-md text-black">{{ $item->date_to_be_posted }}</span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" class="border border-black p-3 align-top">
+                    <span class="block text-md font-bold mb-1">Particulars:</span>
+                    <span class="text-md text-black">Posting of {{ $item->particulars }}</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-         <div class="pb-1">
-            <p class="text-md font-bold">Title:</span>
-            <p class="text-md">{{ $item->doc_title }}</p>
-        </div>
-
-        <div class="pb-1">
-            <p class="text-md font-bold">Particulars:</span>
-            <p class="text-md">Posting of <span>{{ $item->particulars }}</span></p>
-        </div>
-
-        <div class="pb-1">
-            <p class="text-md font-bold">Schedule of Posting:</span>
-            <p class="text-md">{{ $item->date_to_be_posted }}</p>
-        </div>
-
-         <div class="pb-1">
-            <p class="text-md font-bold">Requested By:</span>
+    <div style="padding-top: 50px;">
+        <div class="w-full">
+            <p class="text-md font-bold mb-5">Requested By:</p>
             <p class="text-md">{{ $item->personnel }}</p>
         </div>
-
     </div>
+</div>
 </body>
 </html>

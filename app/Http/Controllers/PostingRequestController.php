@@ -11,12 +11,28 @@ use Spatie\LaravelPdf\Facades\Pdf;
 
 class PostingRequestController extends Controller
 {
-    public function index()
-    {
-        // Fetch all records to show them on the dashboard
-        $requests = PostingRequest::latest()->get();
-        return view('dashboard', compact('requests'));
-    }
+public function index()
+{
+    $requests = PostingRequest::latest()->get();
+    
+    $total = $requests->count();
+    $pending = $requests->where('status', 'pending')->count();
+    $posted = $requests->where('status', 'posted')->count();
+    $archived = $requests->where('status', 'archived')->count();
+
+    // Calculate percentages safely
+    $stats = [
+        'total' => $total,
+        'pending' => $pending,
+        'posted' => $posted,
+        'archived' => $archived,
+        'pending_percent' => $total > 0 ? round(($pending / $total) * 100) : 0,
+        'posted_percent' => $total > 0 ? round(($posted / $total) * 100) : 0,
+        'archived_percent' => $total > 0 ? round(($archived / $total) * 100) : 0,
+    ];
+
+    return view('dashboard', compact('requests', 'stats'));
+}
     public function create()
 {
     // This simply returns the public view
