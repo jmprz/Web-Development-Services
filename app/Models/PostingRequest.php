@@ -17,5 +17,6 @@ class PostingRequest extends Model
     'ctrl_no',
     'doc_no',
     'status',
+    'encoded_by'
     ];
 }

@@ -33,21 +33,21 @@
     <table class="w-full border-2 border-black border-collapse text-left">
         <tbody>
             <tr>
-                <td class="w-1/3 border border-black p-3 align-top">
+                <td class="w-1/3 border-2 border-black p-3 align-top">
                     <span class="block text-md font-bold mb-1">Office / College:</span>
                     <span class="text-md text-black">{{ $item->department }}</span>
                 </td>
-                <td class="w-1/3 border border-black p-3 align-top">
+                <td class="w-1/3 border-2 border-black p-3 align-top">
                     <span class="block text-md font-bold mb-1">Title:</span>
                     <span class="text-md text-black">{{ $item->doc_title }}</span>
                 </td>
-                <td class="w-1/3 border border-black p-3 align-top">
+                <td class="w-1/3 border-2 border-black p-3 align-top">
                     <span class="block text-md font-bold mb-1">Schedule of Posting:</span>
                     <span class="text-md text-black">{{ $item->date_to_be_posted }}</span>
                 </td>
             </tr>
             <tr>
-                <td colspan="3" class="border border-black p-3 align-top">
+                <td colspan="3" class="border-2 border-black p-3 align-top">
                     <span class="block text-md font-bold mb-1">Particulars:</span>
                     <span class="text-md text-black">Posting of {{ $item->particulars }}</span>
                 </td>

@@ -42,8 +42,8 @@
             <div class="bg-gradient-to-r from-red-700 to-red-800 p-8 text-white">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 class="text-3xl font-extrabold tracking-tight">EARIST</h1>
-                        <p class="text-red-100 font-medium opacity-90">Web Development Services</p>
+                        <h1 class="text-3xl font-extrabold tracking-tighter leading-none">EARIST</h1>
+                        <p class="text-red-100 font-medium uppercase tracking-[0.2em] opacity-80 leading-tightuppercase">Web Development Services</p>
                     </div>
                     <div class="bg-white/10 backdrop-blur-md rounded-lg px-4 py-2 border border-white/20">
                         <span class="text-xs uppercase tracking-widest font-bold">Posting Request Module</span>

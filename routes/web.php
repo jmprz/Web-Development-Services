@@ -4,20 +4,21 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostingRequestController;
 use Illuminate\Support\Facades\Route;
 
-// Public Routes
+// Truly Public Routes
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Public Form Routes
-Route::get('/submit-request', [PostingRequestController::class, 'create'])->name('public.request.form');
-Route::post('/submit-request', [PostingRequestController::class, 'store'])->name('public.request.store');
-
-// Authenticated (Admin) Routes
+// Authenticated (Admin Only) Routes
 Route::middleware(['auth', 'verified'])->group(function () {
-    
-    // Dashboard - Only one definition needed
+
+    // Dashboard
     Route::get('/dashboard', [PostingRequestController::class, 'index'])->name('dashboard');
+
+    // Internal Form Routes (Now protected)
+    // Changing the name to 'admin.request.form' makes it clearer
+    Route::get('/submit-request', [PostingRequestController::class, 'create'])->name('posting-request-form');
+    Route::post('/submit-request', [PostingRequestController::class, 'store'])->name('public.request.store');
 
     // PDF Generation
     Route::get('/posting-request/pdf/{postingRequest}', [PostingRequestController::class, 'downloadPdf'])
@@ -27,10 +28,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/posting-request/{postingRequest}/status', [PostingRequestController::class, 'updateStatus'])
         ->name('posting-request.update-status');
 
-    // Profile Management (Breeze Default)
+    // CRUD Operations
+    Route::get('/admin/request/{id}/edit', [PostingRequestController::class, 'edit'])->name('posting-request.edit');
+    Route::put('/admin/request/{id}', [PostingRequestController::class, 'update'])->name('posting-request.update');
+    Route::delete('/admin/request/{id}', [PostingRequestController::class, 'destroy'])->name('posting-request.destroy');
+
+    // Profile Management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
