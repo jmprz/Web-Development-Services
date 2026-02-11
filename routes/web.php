@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Route;
 
 // Truly Public Routes
 Route::get('/', function () {
-    return view('welcome');
-});
+   return redirect()->route('dashboard');
+})->middleware(['auth']);
 
 // Authenticated (Admin Only) Routes
 Route::middleware(['auth', 'verified'])->group(function () {
