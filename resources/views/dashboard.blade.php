@@ -20,7 +20,39 @@
     </style>
 </head>
 
-<body class="bg-slate-50 antialiased" x-data="{ activeTab: 'summary', editModal: false, item: {} }">
+<body class="bg-slate-50 antialiased" 
+      x-data="{ 
+        activeTab: 'summary', 
+        editModal: false, 
+        reminderModal: false, 
+        reminderData: { id: null, title: '', detail: '', deadline: '', mode: 'create' },
+        urgentAlert: true, 
+        item: {} 
+      }">
+       @php 
+        $urgentReminder = $reminders
+    ->filter(fn($r) => $r->status !== 'completed' && $r->days_remaining <= 3 && $r->days_remaining >= 0)
+    ->sortBy('days_remaining')
+    ->first();
+    @endphp
+
+    {{-- Urgent Alert Modal --}}
+    @if($urgentReminder)
+    <div x-show="urgentAlert" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-cloak>
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border-t-8 border-red-600">
+            <div class="text-center">
+                <div class="h-16 w-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                <h2 class="text-xl font-black text-slate-800 mb-2">Upcoming Deadline!</h2>
+                <p class="text-slate-500 text-sm mb-6">
+                    <strong>{{ $urgentReminder->title }}</strong> is due <span class="text-red-600 font-bold">{{ $urgentReminder->days_remaining == 0 ? 'today' : $urgentReminder->days_remaining . ' days' }}</span>.
+                </p>
+                <button @click="urgentAlert = false" class="w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700 transition">Acknowledge</button>
+            </div>
+        </div>
+    </div>
+    @endif
   <nav x-data="{ mobileMenuOpen: false, userDropdownOpen: false }" class="bg-gradient-to-r from-red-700 to-red-800 text-white shadow-md no-print relative">
     <div class="max-w-[1400px] mx-auto px-6 py-3 flex justify-between items-center">
         
@@ -31,8 +63,28 @@
                 <span class="text-[10px] font-medium uppercase tracking-[0.2em] opacity-80 leading-tight">Web Development Services</span>
             </div>
         </div>
-
+@if($urgentReminder)
+<div class="hidden lg:flex items-center gap-2 bg-black/20 px-3 py-1.5 rounded-full border border-white/10 animate-pulse">
+    <div class="flex items-center gap-2">
+        <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+        </span>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-red-200">Deadline:</span>
+    </div>
+    <div class="text-[11px] font-mono font-black text-white" 
+         x-data="timer('{{ $urgentReminder->deadline }}')" 
+         x-init="init()">
+        <span x-text="time.days">00</span>d : 
+        <span x-text="time.hours">00</span>h : 
+        <span x-text="time.minutes">00</span>m
+    </div>
+</div>
+@endif
         <div class="hidden md:flex items-center gap-6">
+            <button @click="reminderModal = true" class="text-[11px] bg-amber-500 hover:bg-amber-400 px-4 py-2 rounded-lg transition tracking-widest uppercase font-bold text-white shadow-lg shadow-amber-900/20">
+                    + Set Reminder
+                </button>
             <a href="{{ route('posting-request-form') }}" target="_blank"
                 class="text-[11px] bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-2 border border-white/20 rounded-lg transition tracking-widest uppercase font-bold">
                 Posting Request Module
@@ -108,6 +160,12 @@
                 :class="activeTab === 'records' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-500'"
                 class="pb-4 px-2 font-bold text-sm border-b-2 transition-all focus:outline-none">
                 Request Records
+            </button>
+            <button @click="activeTab = 'reminders'" :class="activeTab === 'reminders' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-500'" class="pb-4 px-2 font-bold text-sm border-b-2 transition-all">
+                Reminders 
+                @if($reminders->count() > 0)
+                <span class="ml-2 bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[10px]">{{ $reminders->count() }}</span>
+                @endif
             </button>
             <button @click="activeTab = 'audit'"
                 :class="activeTab === 'audit' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-500'"
@@ -307,6 +365,62 @@
             </div>
         </div>
 
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @foreach($reminders as $rem)
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all relative {{ $rem->status === 'completed' ? 'opacity-70 grayscale-[0.2]' : '' }}">
+        
+        <div class="flex justify-between items-start mb-4">
+            <div class="h-10 w-10 rounded-xl {{ $rem->status === 'completed' ? 'bg-emerald-50 text-emerald-400' : 'bg-slate-50 text-slate-400' }} flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+                @if($rem->status !== 'completed')
+                    <span class="text-[10px] font-black uppercase px-2 py-1 rounded {{ $rem->days_remaining <= 3 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600' }}">
+                        {{ $rem->days_remaining == 0 ? 'Due Today' : $rem->days_remaining . ' Days Remaining' }}
+                    </span>
+                @else
+                    <span class="text-[10px] font-black uppercase px-2 py-1 rounded bg-emerald-100 text-emerald-700 flex items-center gap-1">Finished</span>
+                @endif
+            </div>
+        </div>
+
+        <h3 class="font-bold text-slate-800 text-lg leading-tight mb-2 {{ $rem->status === 'completed' ? 'line-through text-slate-400' : '' }}">{{ $rem->title }}</h3>
+        <p class="text-sm text-slate-500 mb-6">{{ $rem->detail }}</p>
+
+        <div class="pt-4 border-t border-slate-100">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-xs font-bold text-slate-400 italic">Due: {{ \Carbon\Carbon::parse($rem->deadline)->format('M d, Y') }}</span>
+                
+                {{-- Toggle Done/Undo --}}
+                <form action="{{ route('reminders.update', $rem->id) }}" method="POST">
+                    @csrf @method('PATCH')
+                    <input type="hidden" name="status" value="{{ $rem->status === 'completed' ? 'pending' : 'completed' }}">
+                    <button type="submit" class="flex items-center gap-1 text-[11px] font-black uppercase {{ $rem->status === 'completed' ? 'text-emerald-600' : 'text-slate-400' }}">
+                        {{ $rem->status === 'completed' ? 'Undo' : 'Done' }}
+                    </button>
+                </form>
+            </div>
+
+            <div class="flex items-center gap-2">
+                {{-- Edit Button: This populates the reminderData object --}}
+                <button @click="reminderData = { id: {{ $rem->id }}, title: '{{ addslashes($rem->title) }}', detail: '{{ addslashes($rem->detail) }}', deadline: '{{ $rem->deadline }}', mode: 'edit' }; reminderModal = true;" 
+                    class="flex-1 bg-slate-50 hover:bg-blue-50 text-slate-500 py-2 rounded-lg text-[10px] font-bold uppercase transition">
+                    Edit
+                </button>
+                
+                {{-- Delete Button --}}
+                <form action="{{ route('reminders.destroy', $rem->id) }}" method="POST" onsubmit="return confirm('Delete this reminder?');">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="px-3 py-2 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-lg transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
+
       <div x-show="activeTab === 'audit'" x-transition x-cloak>
     <div class="mb-8">
         <h2 class="text-2xl font-black text-slate-800 tracking-tight">System Audit Trail</h2>
@@ -453,7 +567,51 @@
             </div>
         </div>
     </main>
+<div x-show="reminderModal" class="fixed inset-0 z-[70] overflow-y-auto" x-cloak>
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="reminderModal = false"></div>
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
+            
+            <div class="p-6 text-white font-black uppercase tracking-widest transition-colors"
+                 :class="reminderData.mode === 'edit' ? 'bg-blue-600' : 'bg-amber-500'"
+                 x-text="reminderData.mode === 'edit' ? 'Edit Office Reminder' : 'Add Office Reminder'">
+            </div>
 
+           <form :action="reminderData.mode === 'edit' ? '{{ url('admin/reminders') }}/' + reminderData.id : '{{ route('reminders.store') }}'" 
+      method="POST" 
+      class="p-8 space-y-5">
+                @csrf
+                
+                <template x-if="reminderData.mode === 'edit'">
+                    @method('PATCH')
+                </template>
+
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase">Reminder Title</label>
+                    <input type="text" name="title" x-model="reminderData.title" required placeholder="e.g. Dept B Letter Submission" class="w-full mt-1 border-slate-200 rounded-xl focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase">Full Details</label>
+                    <textarea name="detail" rows="3" x-model="reminderData.detail" required placeholder="Describe the task or requirement..." class="w-full mt-1 border-slate-200 rounded-xl focus:ring-amber-500"></textarea>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase">Deadline Schedule</label>
+                    <input type="date" name="deadline" x-model="reminderData.deadline" required class="w-full mt-1 border-slate-200 rounded-xl focus:ring-amber-500">
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" @click="reminderModal = false" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold">Cancel</button>
+                    
+                    <button type="submit" 
+                            class="flex-1 py-3 text-white rounded-xl font-bold shadow-lg transition-colors"
+                            :class="reminderData.mode === 'edit' ? 'bg-blue-600 shadow-blue-200' : 'bg-amber-500 shadow-amber-200'"
+                            x-text="reminderData.mode === 'edit' ? 'Update Reminder' : 'Set Deadline'">
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
     <script>
         // Search Logic
         document.getElementById('tableSearch').addEventListener('keyup', function () {
@@ -494,6 +652,31 @@
             });
         });
     </script>
+    <script>
+function timer(expiryDate) {
+    return {
+        expiry: new Date(expiryDate).getTime(),
+        time: { days: '00', hours: '00', minutes: '00' },
+        init() {
+            this.update();
+            setInterval(() => this.update(), 60000); // Update every minute
+        },
+        update() {
+            let now = new Date().getTime();
+            let distance = this.expiry - now;
+
+            if (distance < 0) {
+                this.time = { days: '0', hours: '0', minutes: '0' };
+                return;
+            }
+
+            this.time.days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            this.time.hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            this.time.minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        }
+    }
+}
+</script>
 </body>
 
 </html>

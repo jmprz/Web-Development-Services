@@ -37,6 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+
+    // Reminder Routes
+    Route::post('/admin/reminders', [App\Http\Controllers\ReminderController::class, 'store'])->name('reminders.store');
+    Route::delete('/admin/reminders/{reminder}', [App\Http\Controllers\ReminderController::class, 'destroy'])->name('reminders.destroy');
+    Route::patch('/admin/reminders/{reminder}', [App\Http\Controllers\ReminderController::class, 'update'])->name('reminders.update');
+
+    });
 
 require __DIR__ . '/auth.php';

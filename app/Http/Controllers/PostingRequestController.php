@@ -11,29 +11,38 @@ use Illuminate\Support\Facades\Auth;
 class PostingRequestController extends Controller
 {
     public function index()
-    {
-        // Increased take to 20 so the separate tab feels full
-        $activities = Activity::with('user')->latest()->take(20)->get();
-        $requests = PostingRequest::latest()->get();
+{
+    // 1. Fetch activities and requests (Your existing logic)
+    $activities = Activity::with('user')->latest()->take(20)->get();
+    $requests = PostingRequest::latest()->get();
 
-        $total = $requests->count();
-        $pending = $requests->where('status', 'pending')->count();
-        $posted = $requests->where('status', 'posted')->count();
-        $archived = $requests->where('status', 'archived')->count();
+    // 2. Fetch Reminders (The new part)
+    // We use .map to calculate days_remaining so the blade file doesn't crash
+    $reminders = \App\Models\Reminder::all()->map(function($reminder) {
+        $reminder->days_remaining = now()->startOfDay()
+            ->diffInDays(\Carbon\Carbon::parse($reminder->deadline)->startOfDay(), false);
+        return $reminder;
+    });
 
-        $stats = [
-            'total' => $total,
-            'pending' => $pending,
-            'posted' => $posted,
-            'archived' => $archived,
-            'pending_percent' => $total > 0 ? round(($pending / $total) * 100) : 0,
-            'posted_percent' => $total > 0 ? round(($posted / $total) * 100) : 0,
-            'archived_percent' => $total > 0 ? round(($archived / $total) * 100) : 0,
-        ];
+    // 3. Stats calculation (Your existing logic)
+    $total = $requests->count();
+    $pending = $requests->where('status', 'pending')->count();
+    $posted = $requests->where('status', 'posted')->count();
+    $archived = $requests->where('status', 'archived')->count();
 
-        return view('dashboard', compact('requests', 'stats', 'activities'));
-    }
+    $stats = [
+        'total' => $total,
+        'pending' => $pending,
+        'posted' => $posted,
+        'archived' => $archived,
+        'pending_percent' => $total > 0 ? round(($pending / $total) * 100) : 0,
+        'posted_percent' => $total > 0 ? round(($posted / $total) * 100) : 0,
+        'archived_percent' => $total > 0 ? round(($archived / $total) * 100) : 0,
+    ];
 
+    // 4. Return view with 'reminders' added to compact
+    return view('dashboard', compact('requests', 'stats', 'activities', 'reminders'));
+}
     public function create()
     {
         return view('posting-request-form');
