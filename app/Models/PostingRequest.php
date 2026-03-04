@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class PostingRequest extends Model
 {
     protected $fillable = [
-       'department',
+    'department',
     'personnel',
+    'position',
     'particulars',
     'date_to_be_posted',
     'doc_title',

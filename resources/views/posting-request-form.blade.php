@@ -81,6 +81,11 @@
                                 <input type="text" name="personnel" required placeholder="Full Name"
                                     class="block w-full px-4 py-3 rounded-xl border-slate-200 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all duration-200 bg-slate-50">
                             </div>
+
+                             <div class="space-y-2">
+                                <label class="text-sm font-bold text-slate-700 ml-1">Position / Designation</label>
+                                <input type="text" name="position" required placeholder="e.g. Director, Chief"
+                                    class="block w-full px-4 py-3 rounded-xl border-slate-200 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 transition-all duration-200 bg-slate-50">
                         </div>
                     </div>
 

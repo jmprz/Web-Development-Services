@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PostingRequest;
 use App\Models\Activity;
 use Illuminate\Http\Request;
-use Spatie\LaravelPdf\Facades\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 
 class PostingRequestController extends Controller
@@ -52,6 +52,7 @@ class PostingRequestController extends Controller
         $validated = $request->validate([
             'department' => 'required',
             'personnel' => 'required',
+            'position' => 'required|string',
             'particulars' => 'required',
             'date_to_be_posted' => 'required|date',
             'doc_title' => 'required',
@@ -146,11 +147,14 @@ class PostingRequestController extends Controller
         return redirect()->back()->with('success', 'Deleted successfully');
     }
 
-    public function downloadPdf(PostingRequest $postingRequest)
-    {
-        return Pdf::view('pdfs.request-slip', ['item' => $postingRequest])
-            ->format('a4')
-            ->name('EARIST-WDS-' . $postingRequest->ctrl_no . '.pdf');
-    }
 
+
+public function downloadPdf(PostingRequest $postingRequest)
+{
+    // This loads the view and the data instantly using pure PHP
+    $pdf = Pdf::loadView('pdfs.request-slip', ['item' => $postingRequest])
+              ->setPaper('a4', 'portrait');
+
+    return $pdf->download('EARIST-WDS-' . $postingRequest->ctrl_no . '.pdf');
+    }
 }
